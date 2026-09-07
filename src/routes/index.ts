@@ -5,6 +5,7 @@ import { LeadController } from '../controllers/lead.controller.js';
 import { ConversationController } from '../controllers/conversation.controller.js';
 import { AnalyticsController } from '../controllers/analytics.controller.js';
 import { MetaController } from '../controllers/meta.controller.js';
+import { CampaignController } from '../controllers/campaign.controller.js';
 import { WebhookController } from '../controllers/webhook.controller.js';
 import { authenticate } from '../middlewares/auth.js';
 import { requireTenant } from '../middlewares/tenant.js';
@@ -36,6 +37,12 @@ router.post('/inventory/:inventoryId/promote', authenticate, requireTenant, Meta
 router.get('/integrations/meta/connect', authenticate, requireTenant, MetaController.getConnectUrl);
 router.get('/integrations/meta/callback', MetaController.handleCallback);
 router.get('/integrations/meta/accounts', authenticate, requireTenant, MetaController.getConnectedAccounts);
+
+// ── Campaigns (Meta Ad Engine) ───────────
+router.get('/campaigns', authenticate, requireTenant, CampaignController.list);
+router.get('/campaigns/:id', authenticate, requireTenant, CampaignController.getById);
+router.post('/campaigns', authenticate, requireTenant, CampaignController.create);
+router.patch('/campaigns/:id/status', authenticate, requireTenant, CampaignController.updateStatus);
 
 // ── Webhooks (Meta Incoming Messages/Leads)
 router.get('/webhooks/meta', WebhookController.verify);

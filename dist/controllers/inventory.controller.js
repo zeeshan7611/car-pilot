@@ -3,8 +3,40 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InventoryController = void 0;
 const InventoryItem_js_1 = require("../models/InventoryItem.js");
 const ai_service_js_1 = require("../integrations/ai/ai.service.js");
+const localStorage_js_1 = require("../storage/localStorage.js");
+const catalog_js_1 = require("../data/catalog.js");
 const aiService = new ai_service_js_1.MockAIService();
 exports.InventoryController = {
+    /**
+     * Return predefined vehicle brands, models, categories, specs, and popular locations
+     */
+    async getCatalog(_req, res) {
+        res.json({
+            success: true,
+            data: catalog_js_1.VEHICLE_CATALOG,
+        });
+    },
+    /**
+     * Generate AI description and copy before vehicle is saved to DB
+     */
+    async generateDraftAiContent(req, res) {
+        const { title, brand, model, sellingPrice, specifications } = req.body;
+        if (!brand || !model) {
+            res.status(400).json({ success: false, message: 'Brand and Model are required to generate AI content' });
+            return;
+        }
+        const aiContent = await aiService.generateProductCopy({
+            title: title || `${brand} ${model}`,
+            brand,
+            model,
+            price: Number(sellingPrice) || 500000,
+            specifications: specifications || {},
+        });
+        res.json({
+            success: true,
+            data: aiContent,
+        });
+    },
     async getAll(req, res) {
         const orgId = req.user.organizationId;
         const { status, search } = req.query;
@@ -89,13 +121,14 @@ exports.InventoryController = {
         else if (typeof body.specifications === 'object' && body.specifications !== null) {
             specs = body.specifications;
         }
+        const derivedTitle = body.title?.trim() || `${body.brand || ''} ${body.model || ''}`.trim() || 'Untitled Vehicle';
         const item = await InventoryItem_js_1.InventoryItem.create({
             organizationId: orgId,
-            title: body.title,
+            title: derivedTitle,
             description: body.description,
             category: body.category || 'CAR',
-            brand: body.brand,
-            model: body.model,
+            brand: body.brand || 'Other',
+            model: body.model || 'Standard',
             price: Number(body.sellingPrice || body.price || 0),
             sellingPrice: Number(body.sellingPrice || 0),
             purchasePrice: body.purchasePrice ? Number(body.purchasePrice) : undefined,
@@ -144,5 +177,31 @@ exports.InventoryController = {
             specifications: item.specifications,
         });
         res.json({ success: true, data: aiContent });
+    },
+    async uploadMedia(req, res) {
+        const orgId = req.user.organizationId;
+        const item = await InventoryItem_js_1.InventoryItem.findOne({ _id: req.params.id, organizationId: orgId });
+        if (!item) {
+            res.status(404).json({ success: false, message: 'Vehicle not found' });
+            return;
+        }
+        const files = req.files;
+        if (!files || files.length === 0) {
+            res.status(400).json({ success: false, message: 'No media files provided' });
+            return;
+        }
+        const newMedia = files.map((file) => ({
+            url: localStorage_js_1.LocalStorageService.getMediaUrl(req, file.filename),
+            key: file.filename,
+            type: localStorage_js_1.LocalStorageService.determineMediaType(file.mimetype),
+            isPrimary: item.media.length === 0,
+        }));
+        item.media.push(...newMedia);
+        await item.save();
+        res.json({
+            success: true,
+            message: 'Media uploaded successfully',
+            data: item.media,
+        });
     },
 };

@@ -94,4 +94,12 @@ export class MockAIService implements AIService {
       intent: 'GENERAL_INQUIRY',
     };
   }
+
+  async generateSalesReply(incomingMessage: string): Promise<string> {
+    const result = await this.respondToLead({
+      customerMessage: incomingMessage,
+      leadName: 'Customer',
+    });
+    return result.reply;
+  }
 }

@@ -49,5 +49,12 @@ class MockAIService {
             intent: 'GENERAL_INQUIRY',
         };
     }
+    async generateSalesReply(incomingMessage) {
+        const result = await this.respondToLead({
+            customerMessage: incomingMessage,
+            leadName: 'Customer',
+        });
+        return result.reply;
+    }
 }
 exports.MockAIService = MockAIService;

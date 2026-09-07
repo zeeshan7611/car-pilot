@@ -97,4 +97,34 @@ exports.AuthController = {
             data: { user, organization: org },
         });
     },
+    async refreshToken(req, res) {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            res.status(400).json({ success: false, message: 'Refresh token required' });
+            return;
+        }
+        try {
+            const decoded = jsonwebtoken_1.default.verify(refreshToken, index_js_1.config.jwt.refreshSecret);
+            const user = await User_js_1.User.findById(decoded.userId);
+            if (!user) {
+                res.status(401).json({ success: false, message: 'User no longer exists' });
+                return;
+            }
+            const newAccessToken = jsonwebtoken_1.default.sign({ userId: user._id, organizationId: user.organizationId, role: user.role, email: user.email }, index_js_1.config.jwt.secret, { expiresIn: '1d' });
+            const newRefreshToken = jsonwebtoken_1.default.sign({ userId: user._id, organizationId: user.organizationId }, index_js_1.config.jwt.refreshSecret, { expiresIn: '7d' });
+            res.json({
+                success: true,
+                data: {
+                    accessToken: newAccessToken,
+                    refreshToken: newRefreshToken,
+                },
+            });
+        }
+        catch {
+            res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+        }
+    },
+    async logout(_req, res) {
+        res.json({ success: true, message: 'Logged out successfully' });
+    },
 };

@@ -34,7 +34,13 @@ const InventoryItemSchema = new Schema<IInventoryItem>(
     category: { type: String, default: 'CAR' },
     brand: { type: String, required: true, trim: true, index: true },
     model: { type: String, required: true, trim: true },
-    price: { type: Number, required: true },
+    price: {
+      type: Number,
+      required: true,
+      default: function (this: any) {
+        return this.sellingPrice || 0;
+      },
+    },
     sellingPrice: { type: Number, required: true, index: true },
     purchasePrice: { type: Number },
     status: {

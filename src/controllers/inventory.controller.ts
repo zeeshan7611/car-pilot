@@ -2,10 +2,45 @@ import { Response } from 'express';
 import { InventoryItem } from '../models/InventoryItem.js';
 import { AuthenticatedRequest } from '../middlewares/auth.js';
 import { MockAIService } from '../integrations/ai/ai.service.js';
+import { LocalStorageService } from '../storage/localStorage.js';
+import { VEHICLE_CATALOG } from '../data/catalog.js';
 
 const aiService = new MockAIService();
 
 export const InventoryController = {
+  /**
+   * Return predefined vehicle brands, models, categories, specs, and popular locations
+   */
+  async getCatalog(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    res.json({
+      success: true,
+      data: VEHICLE_CATALOG,
+    });
+  },
+
+  /**
+   * Generate AI description and copy before vehicle is saved to DB
+   */
+  async generateDraftAiContent(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { title, brand, model, sellingPrice, specifications } = req.body;
+    if (!brand || !model) {
+      res.status(400).json({ success: false, message: 'Brand and Model are required to generate AI content' });
+      return;
+    }
+
+    const aiContent = await aiService.generateProductCopy({
+      title: title || `${brand} ${model}`,
+      brand,
+      model,
+      price: Number(sellingPrice) || 500000,
+      specifications: specifications || {},
+    });
+
+    res.json({
+      success: true,
+      data: aiContent,
+    });
+  },
   async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     const orgId = req.user!.organizationId;
     const { status, search } = req.query;
@@ -95,13 +130,15 @@ export const InventoryController = {
       specs = body.specifications;
     }
 
+    const derivedTitle = body.title?.trim() || `${body.brand || ''} ${body.model || ''}`.trim() || 'Untitled Vehicle';
+
     const item = await InventoryItem.create({
       organizationId: orgId,
-      title: body.title,
+      title: derivedTitle,
       description: body.description,
       category: body.category || 'CAR',
-      brand: body.brand,
-      model: body.model,
+      brand: body.brand || 'Other',
+      model: body.model || 'Standard',
       price: Number(body.sellingPrice || body.price || 0),
       sellingPrice: Number(body.sellingPrice || 0),
       purchasePrice: body.purchasePrice ? Number(body.purchasePrice) : undefined,
@@ -162,5 +199,36 @@ export const InventoryController = {
     });
 
     res.json({ success: true, data: aiContent });
+  },
+
+  async uploadMedia(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const orgId = req.user!.organizationId;
+    const item = await InventoryItem.findOne({ _id: req.params.id, organizationId: orgId });
+    if (!item) {
+      res.status(404).json({ success: false, message: 'Vehicle not found' });
+      return;
+    }
+
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      res.status(400).json({ success: false, message: 'No media files provided' });
+      return;
+    }
+
+    const newMedia = files.map((file) => ({
+      url: LocalStorageService.getMediaUrl(req, file.filename),
+      key: file.filename,
+      type: LocalStorageService.determineMediaType(file.mimetype),
+      isPrimary: item.media.length === 0,
+    }));
+
+    item.media.push(...newMedia);
+    await item.save();
+
+    res.json({
+      success: true,
+      message: 'Media uploaded successfully',
+      data: item.media,
+    });
   },
 };

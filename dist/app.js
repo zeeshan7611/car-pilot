@@ -11,13 +11,16 @@ const morgan_1 = __importDefault(require("morgan"));
 const compression_1 = __importDefault(require("compression"));
 const index_js_1 = require("./routes/index.js");
 const index_js_2 = require("./config/index.js");
+const path_1 = __importDefault(require("path"));
 exports.app = (0, express_1.default)();
-exports.app.use((0, helmet_1.default)());
+exports.app.use((0, helmet_1.default)({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 exports.app.use((0, cors_1.default)({ origin: index_js_2.config.corsOrigin, credentials: true }));
 exports.app.use((0, compression_1.default)());
 exports.app.use(express_1.default.json());
 exports.app.use(express_1.default.urlencoded({ extended: true }));
 exports.app.use((0, morgan_1.default)('dev'));
+// Static serving for local media uploads (images/reels)
+exports.app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 // Health check
 exports.app.get('/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });

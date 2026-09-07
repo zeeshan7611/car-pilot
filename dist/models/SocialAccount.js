@@ -33,43 +33,27 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InventoryItem = void 0;
+exports.SocialAccount = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const InventoryItemSchema = new mongoose_1.Schema({
+const SocialAccountSchema = new mongoose_1.Schema({
     organizationId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
-    title: { type: String, required: true, trim: true },
-    description: { type: String },
-    category: { type: String, default: 'CAR' },
-    brand: { type: String, required: true, trim: true, index: true },
-    model: { type: String, required: true, trim: true },
-    price: {
-        type: Number,
+    platform: {
+        type: String,
+        enum: ['FACEBOOK', 'INSTAGRAM', 'META_ADS'],
         required: true,
-        default: function () {
-            return this.sellingPrice || 0;
-        },
     },
-    sellingPrice: { type: Number, required: true, index: true },
-    purchasePrice: { type: Number },
+    accountId: { type: String, required: true },
+    accountName: { type: String, required: true },
+    accessTokenEncrypted: { type: String, required: true },
+    refreshTokenEncrypted: { type: String },
+    tokenExpiresAt: { type: Date },
     status: {
         type: String,
-        enum: ['DRAFT', 'AVAILABLE', 'RESERVED', 'SOLD', 'ARCHIVED'],
-        default: 'AVAILABLE',
+        enum: ['ACTIVE', 'EXPIRED', 'DISCONNECTED', 'ERROR'],
+        default: 'ACTIVE',
         index: true,
     },
-    media: [
-        {
-            url: { type: String, required: true },
-            key: { type: String },
-            type: { type: String, default: 'IMAGE' },
-            isPrimary: { type: Boolean, default: false },
-        },
-    ],
-    location: { type: String },
-    specifications: { type: mongoose_1.Schema.Types.Mixed, default: {} },
-    tags: [{ type: String }],
-    createdBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    metadata: { type: mongoose_1.Schema.Types.Mixed, default: {} },
 }, { timestamps: true });
-InventoryItemSchema.index({ organizationId: 1, status: 1 });
-InventoryItemSchema.index({ organizationId: 1, createdAt: -1 });
-exports.InventoryItem = mongoose_1.default.model('InventoryItem', InventoryItemSchema);
+SocialAccountSchema.index({ organizationId: 1, platform: 1, accountId: 1 }, { unique: true });
+exports.SocialAccount = mongoose_1.default.model('SocialAccount', SocialAccountSchema);

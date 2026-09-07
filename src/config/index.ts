@@ -16,7 +16,9 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '1d',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  corsOrigin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+    : ['http://localhost:3000', 'https://car-pilot-frontend.onrender.com'],
   ai: {
     provider: process.env.AI_PROVIDER || 'mock',
     openaiApiKey: process.env.OPENAI_API_KEY || '',

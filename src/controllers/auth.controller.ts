@@ -128,4 +128,47 @@ export const AuthController = {
       data: { user, organization: org },
     });
   },
+
+  async refreshToken(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      res.status(400).json({ success: false, message: 'Refresh token required' });
+      return;
+    }
+
+    try {
+      const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret) as { userId: string; organizationId: string };
+      const user = await User.findById(decoded.userId);
+      if (!user) {
+        res.status(401).json({ success: false, message: 'User no longer exists' });
+        return;
+      }
+
+      const newAccessToken = jwt.sign(
+        { userId: user._id, organizationId: user.organizationId, role: user.role, email: user.email },
+        config.jwt.secret,
+        { expiresIn: '1d' },
+      );
+
+      const newRefreshToken = jwt.sign(
+        { userId: user._id, organizationId: user.organizationId },
+        config.jwt.refreshSecret,
+        { expiresIn: '7d' },
+      );
+
+      res.json({
+        success: true,
+        data: {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        },
+      });
+    } catch {
+      res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+    }
+  },
+
+  async logout(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    res.json({ success: true, message: 'Logged out successfully' });
+  },
 };

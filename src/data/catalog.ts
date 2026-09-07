@@ -1,0 +1,236 @@
+export interface BrandData {
+  name: string;
+  models: string[];
+}
+
+export interface VehicleCatalog {
+  categories: string[];
+  brands: Record<string, string[]>;
+  specifications: {
+    fuelTypes: string[];
+    transmissions: string[];
+    bodyTypes: string[];
+    colors: string[];
+    ownerships: { value: number; label: string }[];
+    manufacturingYears: number[];
+  };
+  popularLocations: {
+    city: string;
+    state: string;
+    googleMapsSearchUrl: string;
+  }[];
+}
+
+const currentYear = new Date().getFullYear();
+const years: number[] = [];
+for (let y = currentYear + 1; y >= 2005; y--) {
+  years.push(y);
+}
+
+export const VEHICLE_CATALOG: VehicleCatalog = {
+  categories: ['CAR', 'SUV', 'HATCHBACK', 'SEDAN', 'LUXURY', 'ELECTRIC', 'COMMERCIAL', 'BIKE', 'OTHER'],
+  brands: {
+    'Maruti Suzuki': [
+      'Swift',
+      'Baleno',
+      'Dzire',
+      'Brezza',
+      'Ertiga',
+      'Grand Vitara',
+      'Fronx',
+      'Wagon R',
+      'Alto K10',
+      'Ciaz',
+      'XL6',
+      'Ignis',
+      'Jimny',
+      'S-Presso',
+    ],
+    Hyundai: [
+      'Creta',
+      'Venue',
+      'i20',
+      'Verna',
+      'Grand i10 Nios',
+      'Exter',
+      'Alcazar',
+      'Tucson',
+      'Ioniq 5',
+      'Aura',
+      'Kona Electric',
+    ],
+    Tata: [
+      'Nexon',
+      'Punch',
+      'Harrier',
+      'Safari',
+      'Tiago',
+      'Tigor',
+      'Altroz',
+      'Curvv',
+      'Nexon EV',
+      'Punch EV',
+      'Tiago EV',
+    ],
+    Mahindra: [
+      'Thar',
+      'Scorpio-N',
+      'Scorpio Classic',
+      'XUV700',
+      'XUV 3XO',
+      'Bolero',
+      'Bolero Neo',
+      'XUV400 EV',
+      'Marazzo',
+    ],
+    Honda: [
+      'City',
+      'Amaze',
+      'Elevate',
+      'WR-V',
+      'Jazz',
+      'Civic',
+      'CR-V',
+    ],
+    Toyota: [
+      'Innova Crysta',
+      'Innova Hycross',
+      'Fortuner',
+      'Urban Cruiser Hyryder',
+      'Glanza',
+      'Rumion',
+      'Camry',
+      'Hilux',
+      'Vellfire',
+      'Land Cruiser',
+    ],
+    Kia: [
+      'Seltos',
+      'Sonet',
+      'Carens',
+      'EV6',
+      'Carnival',
+    ],
+    Volkswagen: [
+      'Virtus',
+      'Taigun',
+      'Polo',
+      'Vento',
+      'Tiguan',
+    ],
+    Skoda: [
+      'Slavia',
+      'Kushaq',
+      'Octavia',
+      'Superb',
+      'Kodiaq',
+      'Rapid',
+    ],
+    MG: [
+      'Hector',
+      'Astor',
+      'ZS EV',
+      'Comet EV',
+      'Gloster',
+      'Windsor EV',
+    ],
+    BMW: [
+      '3 Series',
+      '5 Series',
+      'X1',
+      'X3',
+      'X5',
+      'X7',
+      '7 Series',
+      'M340i',
+      'i4',
+      'iX1',
+    ],
+    'Mercedes-Benz': [
+      'C-Class',
+      'E-Class',
+      'S-Class',
+      'GLA',
+      'GLC',
+      'GLE',
+      'GLS',
+      'A-Class Limousine',
+    ],
+    Audi: [
+      'A4',
+      'A6',
+      'Q3',
+      'Q5',
+      'Q7',
+      'Q8',
+      'e-tron GT',
+    ],
+    Renault: [
+      'Kwid',
+      'Triber',
+      'Kiger',
+      'Duster',
+    ],
+    Nissan: [
+      'Magnite',
+      'X-Trail',
+      'Kicks',
+    ],
+    Jeep: [
+      'Compass',
+      'Meridian',
+      'Wrangler',
+      'Grand Cherokee',
+    ],
+    Ford: [
+      'EcoSport',
+      'Endeavour',
+      'Figo',
+      'Aspire',
+      'Freestyle',
+    ],
+  },
+  specifications: {
+    fuelTypes: ['PETROL', 'DIESEL', 'CNG', 'ELECTRIC', 'HYBRID', 'PETROL + CNG'],
+    transmissions: ['MANUAL', 'AUTOMATIC', 'AMT', 'CVT', 'DCT', 'TORQUE CONVERTER'],
+    bodyTypes: ['SUV', 'SEDAN', 'HATCHBACK', 'MUV', 'COUPE', 'CONVERTIBLE', 'PICKUP'],
+    colors: [
+      'Pearl White',
+      'Polar White',
+      'Metallic Black',
+      'Daytona Grey',
+      'Silver',
+      'Fiery Red',
+      'Navy Blue',
+      'Forest Green',
+      'Desert Gold',
+      'Bronze',
+      'Other',
+    ],
+    ownerships: [
+      { value: 1, label: '1st Owner' },
+      { value: 2, label: '2nd Owner' },
+      { value: 3, label: '3rd Owner' },
+      { value: 4, label: '4th Owner or more' },
+    ],
+    manufacturingYears: years,
+  },
+  popularLocations: [
+    { city: 'Mumbai', state: 'Maharashtra', googleMapsSearchUrl: 'https://maps.google.com/?q=Mumbai' },
+    { city: 'Pune', state: 'Maharashtra', googleMapsSearchUrl: 'https://maps.google.com/?q=Pune' },
+    { city: 'Nagpur', state: 'Maharashtra', googleMapsSearchUrl: 'https://maps.google.com/?q=Nagpur' },
+    { city: 'Nashik', state: 'Maharashtra', googleMapsSearchUrl: 'https://maps.google.com/?q=Nashik' },
+    { city: 'Delhi NCR', state: 'Delhi', googleMapsSearchUrl: 'https://maps.google.com/?q=Delhi' },
+    { city: 'Bengaluru', state: 'Karnataka', googleMapsSearchUrl: 'https://maps.google.com/?q=Bengaluru' },
+    { city: 'Hyderabad', state: 'Telangana', googleMapsSearchUrl: 'https://maps.google.com/?q=Hyderabad' },
+    { city: 'Ahmedabad', state: 'Gujarat', googleMapsSearchUrl: 'https://maps.google.com/?q=Ahmedabad' },
+    { city: 'Surat', state: 'Gujarat', googleMapsSearchUrl: 'https://maps.google.com/?q=Surat' },
+    { city: 'Chennai', state: 'Tamil Nadu', googleMapsSearchUrl: 'https://maps.google.com/?q=Chennai' },
+    { city: 'Kolkata', state: 'West Bengal', googleMapsSearchUrl: 'https://maps.google.com/?q=Kolkata' },
+    { city: 'Jaipur', state: 'Rajasthan', googleMapsSearchUrl: 'https://maps.google.com/?q=Jaipur' },
+    { city: 'Indore', state: 'Madhya Pradesh', googleMapsSearchUrl: 'https://maps.google.com/?q=Indore' },
+    { city: 'Chandigarh', state: 'Punjab/Haryana', googleMapsSearchUrl: 'https://maps.google.com/?q=Chandigarh' },
+    { city: 'Lucknow', state: 'Uttar Pradesh', googleMapsSearchUrl: 'https://maps.google.com/?q=Lucknow' },
+    { city: 'Kochi', state: 'Kerala', googleMapsSearchUrl: 'https://maps.google.com/?q=Kochi' },
+  ],
+};
